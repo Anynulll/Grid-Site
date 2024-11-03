@@ -44,10 +44,10 @@ nav button.active {
     display: flex;
     gap: 1rem;
     align-items: center;
-    flex-wrap: wrap; /* 要素が折り返すようにする */
 }
 
-#addPhotoSection input[type="url"] {
+#addPhotoSection input[type="url"],
+#addPhotoSection input[type="file"] {
     flex: 1;
     padding: 0.8rem;
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -57,7 +57,8 @@ nav button.active {
     transition: all 0.3s ease;
 }
 
-#addPhotoSection input[type="url"]:focus {
+#addPhotoSection input[type="url"]:focus,
+#addPhotoSection input[type="file"]:focus {
     outline: none;
     border-color: #2563eb;
     box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
@@ -254,39 +255,4 @@ nav button.active {
 .drop-zone.drag-over {
     border-color: #2563eb;
     background: rgba(37, 99, 235, 0.1);
-}
-
-/* メディアクエリの追加 */
-@media (max-width: 600px) {
-    body {
-        font-size: 14px; /* スマートフォン向けのフォントサイズ */
-    }
-
-    nav button {
-        padding: 0.5rem 1rem; /* スマートフォン用のボタンサイズ */
-    }
-
-    #addPhotoSection {
-        flex-direction: column; /* スマートフォン用に縦並びに */
-    }
-
-    #addPhotoSection input[type="url"] {
-        margin-bottom: 1rem; /* 入力欄の下にマージンを追加 */
-    }
-}
-
-@media (min-width: 601px) and (max-width: 1200px) {
-    body {
-        font-size: 16px; /* タブレット向けのフォントサイズ */
-    }
-
-    nav button {
-        padding: 0.7rem 1.2rem; /* タブレット用のボタンサイズ */
-    }
-}
-
-@media (min-width: 1201px) {
-    body {
-        font-size: 18px; /* デスクトップ向けのフォントサイズ */
-    }
 }
