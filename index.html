@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Gallery</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <button id="galleryBtn" class="active">ギャラリー</button>
+        <button id="recentlyDeletedBtn">最近削除した項目</button>
+    </nav>
+
+    <div id="addPhotoSection">
+        <input type="url" id="imageUrl" placeholder="画像URLを入力">
+        <input type="file" id="imageFile" accept="image/*" multiple>
+        <button id="addBtn">追加</button>
+    </div>
+
+    <div id="gallery" class="active"></div>
+    <div id="recentlyDeleted"></div>
+
+    <div id="modal" class="modal">
+        <span class="close">&times;</span>
+        <button class="nav prev">&#10094;</button>
+        <button class="nav next">&#10095;</button>
+        <div class="modal-content">
+            <img id="modalImage">
+            <div class="controls">
+                <button id="downloadBtn">ダウンロード</button>
+                <button id="deleteBtn">削除</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
