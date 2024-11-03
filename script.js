@@ -113,6 +113,7 @@ class PhotoGallery {
         document.getElementById('downloadBtn').addEventListener('click', () => this.downloadCurrentImage());
         document.getElementById('deleteBtn').addEventListener('click', () => this.deleteCurrentImage());
 
+        // Handle paste events for image upload
         window.addEventListener('paste', (e) => {
             const items = e.clipboardData.items;
             for (let item of items) {
@@ -122,6 +123,29 @@ class PhotoGallery {
                 }
             }
         });
+
+        // Touch events for mobile swipe navigation
+        this.modal.addEventListener('touchstart', (e) => this.handleTouchStart(e));
+        this.modal.addEventListener('touchmove', (e) => this.handleTouchMove(e));
+    }
+
+    handleTouchStart(e) {
+        this.touchStartX = e.touches[0].clientX;
+    }
+
+    handleTouchMove(e) {
+        const touchEndX = e.touches[0].clientX;
+        const touchDiff = this.touchStartX - touchEndX;
+
+        // If the swipe is significant, navigate
+        if (Math.abs(touchDiff) > 50) {
+            if (touchDiff > 0) {
+                this.navigate(1); // Swipe left
+            } else {
+                this.navigate(-1); // Swipe right
+            }
+            e.preventDefault(); // Prevent scrolling
+        }
     }
 
     isImageUrl(url) {
@@ -206,10 +230,23 @@ class PhotoGallery {
         this.modal.classList.add('active');
         const photos = isDeleted ? this.deletedPhotos : this.photos;
         this.modalImage.src = photos[this.currentIndex].url;
+
+        // Keyboard navigation event listeners
+        window.addEventListener('keydown', this.handleKeydown.bind(this));
     }
 
     closeModal() {
         this.modal.classList.remove('active');
+        // Remove keyboard navigation event listeners
+        window.removeEventListener('keydown', this.handleKeydown.bind(this));
+    }
+
+    handleKeydown(e) {
+        if (e.key === 'ArrowLeft') {
+            this.navigate(-1);
+        } else if (e.key === 'ArrowRight') {
+            this.navigate(1);
+        }
     }
 
     navigate(direction) {
@@ -225,58 +262,50 @@ class PhotoGallery {
         try {
             const response = await fetch(photo.url);
             const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `image-${Date.now()}.jpg`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `image_${this.currentIndex + 1}.jpg`;
+            link.click();
+            URL.revokeObjectURL(link.href);
         } catch (error) {
-            alert('Failed to download image');
+            alert('ダウンロードに失敗しました。');
         }
     }
 
     deleteCurrentImage() {
-        const fromGallery = this.gallery.classList.contains('active');
-        const photos = fromGallery ? this.photos : this.deletedPhotos;
+        const photos = this.gallery.classList.contains('active') ? this.photos : this.deletedPhotos;
         const photo = photos[this.currentIndex];
 
-        if (fromGallery) {
-            const deletedPhoto = this.photos.splice(this.currentIndex, 1)[0];
-            this.deletedPhotos.unshift(deletedPhoto);
+        if (this.gallery.classList.contains('active')) {
+            this.photos.splice(this.currentIndex, 1);
+            this.deletedPhotos.unshift(photo);
         } else {
             this.deletedPhotos.splice(this.currentIndex, 1);
         }
 
-        this.socket.emit('photoDeleted', { url: photo.url, fromGallery });
+        this.socket.emit('photoDeleted', { url: photo.url, fromGallery: this.gallery.classList.contains('active') });
         this.saveToLocalStorage();
-        this.closeModal();
         this.renderGallery();
-    }
-
-    switchView(view) {
-        const galleryBtn = document.getElementById('galleryBtn');
-        const recentlyDeletedBtn = document.getElementById('recentlyDeletedBtn');
-        
-        if (view === 'gallery') {
-            this.gallery.classList.add('active');
-            this.recentlyDeleted.classList.remove('active');
-            galleryBtn.classList.add('active');
-            recentlyDeletedBtn.classList.remove('active');
-        } else {
-            this.gallery.classList.remove('active');
-            this.recentlyDeleted.classList.add('active');
-            galleryBtn.classList.remove('active');
-            recentlyDeletedBtn.classList.add('active');
-        }
+        this.closeModal();
     }
 
     saveToLocalStorage() {
         localStorage.setItem('photos', JSON.stringify(this.photos));
         localStorage.setItem('deletedPhotos', JSON.stringify(this.deletedPhotos));
     }
+
+    switchView(view) {
+        if (view === 'gallery') {
+            this.gallery.classList.add('active');
+            this.recentlyDeleted.classList.remove('active');
+        } else {
+            this.recentlyDeleted.classList.add('active');
+            this.gallery.classList.remove('active');
+        }
+    }
 }
 
-new PhotoGallery();
+// Initialize the photo gallery
+document.addEventListener('DOMContentLoaded', () => {
+    new PhotoGallery();
+});
